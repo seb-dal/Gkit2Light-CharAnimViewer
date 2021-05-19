@@ -151,7 +151,7 @@ std::ostream& operator << (std::ostream& os, const BVHJoint& BVHJoint)
 	g_displayIndex++;
 	for (int i = 0; i < BVHJoint.getNumberOfChildren(); ++i)
 		//os << "childNumber="<<i<<"  childId=" << (BVHJoint.getChildId(i)) << " " << BVHJoint.getChild(i) << " ";
-		os <<BVHJoint.getChild(i) << " ";
+		os <<BVHJoint.getChild(i);
 	g_displayIndex--;
 
 	return os;

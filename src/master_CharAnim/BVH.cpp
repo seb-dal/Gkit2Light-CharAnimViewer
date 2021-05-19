@@ -201,7 +201,7 @@ bool BVH::expect(const std::string& word, std::ifstream& stream)
 std::ostream& operator << (std::ostream& os, const BVH& bvh)
 {
     os << (bvh.getRootId())
-       << "Number of frames : " << bvh.getNumberOfFrame() << std::endl
+       << " Number of frames : " << bvh.getNumberOfFrame() << std::endl
        << "Animation time   : " << bvh.getFrameTime()*(bvh.getNumberOfFrame()-1) << " s" << std::endl;
     os<<bvh.getRoot()<<endl;
     return os;
