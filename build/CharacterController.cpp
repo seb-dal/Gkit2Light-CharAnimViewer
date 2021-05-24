@@ -2,7 +2,7 @@
 #include "window.h"
 
 static Vector Extract_col(const Transform& t, int col) {
-	return Vector(t.m[2][col], t.m[1][col], t.m[0][col]);
+	return Vector(t.m[0][col], t.m[1][col], t.m[2][col]);
 }
 
 static Vector Extract_translate(const Transform& t) {
@@ -51,7 +51,7 @@ void CharacterController::update(const float dt) {
 
 	if (key_state('z') || key_state('Z')) {
 		if (!upPush && key_event().type == SDL_KEYDOWN) {
-			if (m_vMax < 5)
+			if (m_vMax < m_MAX_V)
 				accelerate(1);
 			upPush = true;
 		}

@@ -44,29 +44,48 @@ public:
 
 
 	/*! \brief Tr x Tr */
-	friend inline TransformQ operator*(const TransformQ& a, const TransformQ& b)
-	{
-		// TODO
-		return TransformQ();
+	friend inline TransformQ operator*(const TransformQ& a, const TransformQ& b) {
+		return TransformQ(a.Q * b.Q, a.T * b.T);
 	}
 
 	friend inline Vector 		operator*(const TransformQ& a, const Vector& v)
 	{
-		// TODO
-		return Vector(0, 0, 0);
+		float x = v.x;
+		float y = v.y;
+		float z = v.z;
+		float m[3][3];
+		a.Q.getMatrix33(m);
+
+		float xt = m[0][0] * x + m[0][1] * y + m[0][2] * z;                  // dot(vec4(m[0]), vec4(v, 0))
+		float yt = m[1][0] * x + m[1][1] * y + m[1][2] * z;                  // dot(vec4(m[1]), vec4(v, 0))
+		float zt = m[2][0] * x + m[2][1] * y + m[2][2] * z;                  // dot(vec4(m[2]), vec4(v, 0))
+		// dot(vec4(m[3]), vec4(v, 0)) == dot(vec4(0, 0, 0, 1), vec4(v, 0)) == 0 par definition
+
+		return Vector(xt, yt, zt) * a.T;
 	}
 
 	friend inline Point 		operator*(const TransformQ& a, const Point& v)
 	{
-		// TODO
-		return Point(0, 0, 0);
+		float x = v.x;
+		float y = v.y;
+		float z = v.z;
+		float m[3][3];
+		a.Q.getMatrix33(m);
+
+		float xt = m[0][0] * x + m[0][1] * y + m[0][2] * z;                  // dot(vec4(m[0]), vec4(v, 0))
+		float yt = m[1][0] * x + m[1][1] * y + m[1][2] * z;                  // dot(vec4(m[1]), vec4(v, 0))
+		float zt = m[2][0] * x + m[2][1] * y + m[2][2] * z;                  // dot(vec4(m[2]), vec4(v, 0))
+		// dot(vec4(m[3]), vec4(v, 0)) == dot(vec4(0, 0, 0, 1), vec4(v, 0)) == 0 par definition
+
+		return Point(Vector(xt, yt, zt) * a.T);
 	}
 
 
 	inline static TransformQ slerp(const TransformQ& a, const TransformQ& b, float t)
 	{
-		// TODO
-		return TransformQ();
+		Quaternion Qr;
+		Qr.slerp(a.Q, b.Q, t, true);
+		return TransformQ(Qr, a.T * (1 - t) + b.T * t);
 	}
 
 	void setIdentity()

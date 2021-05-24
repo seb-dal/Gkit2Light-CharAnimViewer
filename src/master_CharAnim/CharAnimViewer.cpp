@@ -68,6 +68,21 @@ void CharAnimViewer::draw_skeleton(const Skeleton& sk)
 	}
 }
 
+void CharAnimViewer::draw_skeleton(const Skeleton& sk, const Transform& pos)
+{
+	for (int i = 0; i < sk.numberOfJoint(); i++) {
+
+		draw_sphere(pos(sk.getJointPosition(i)), 6);
+
+		if (sk.getParentId(i) != -1) {
+			draw_cylinder(pos(sk.getJointPosition(i)), pos(sk.getJointPosition(sk.getParentId(i))), 6);
+		}
+		/*switch (m_bvh.getJoint(i).getName()) {
+
+		}*/
+	}
+}
+
 
 
 int CharAnimViewer::render()
@@ -82,8 +97,10 @@ int CharAnimViewer::render()
 	// Affiche les particules physiques (Question 3 : interaction personnage sphere/ballon)
 	//m_world.draw();
 
-	draw_sphere(Point(b.position()), 20);
-	draw_cylinder(Point(b.position()), Point(b.position(40)), 10);
+	/*draw_sphere(Point(b.position()), 20);
+	draw_cylinder(Point(b.position()), Point(b.position(40)), 10);*/
+
+	draw_skeleton(skc.getSkeleton(), Scale(2.5)(skc.getPos()));
 
 	// Affiche le skeleton à partir de la structure linéaire (tableau) Skeleton
 	draw_skeleton(m_ske);
@@ -154,7 +171,7 @@ int CharAnimViewer::update(const float time, const float delta)
 
 	m_world.update(0.1f);
 
-	b.update(delta);
+	skc.update(delta);
 
 
 

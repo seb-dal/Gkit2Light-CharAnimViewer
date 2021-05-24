@@ -11,6 +11,7 @@
 
 #include <PhysicalWorld.h>
 #include <build/CharacterController.h>
+#include <build/SkeletonControler.h>
 
 class CharAnimViewer : public Viewer
 {
@@ -33,9 +34,11 @@ protected:
 
 	PhysicalWorld m_world;
 
-	CharacterController b;
+	SkeletonControler skc;
 
 	void draw_skeleton(const Skeleton&);
+
+	void draw_skeleton(const Skeleton& sk, const Transform& pos);
 
 private:
 	static CharAnimViewer* psingleton;
