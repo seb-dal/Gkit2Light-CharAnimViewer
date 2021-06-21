@@ -21,42 +21,44 @@ class ViewerBasic : public App
 public:
 	ViewerBasic();
 
-    //! Initialise tout : compile les shaders et construit le programme + les buffers + le vertex array. renvoie -1 en cas d'erreur.
-    int init();
+	//! Initialise tout : compile les shaders et construit le programme + les buffers + le vertex array. renvoie -1 en cas d'erreur.
+	int init();
 
-    //! La fonction d'affichage
-    int render();
+	//! La fonction d'affichage
+	int render();
 
-    void help();
+	void help();
 
-	int quit() { return 1;  }
+	int quit() { return 1; }
 
 protected:
 
-    Orbiter m_camera;
-    DrawParam gl;
-    bool mb_cullface;
-    bool mb_wireframe;
+	Orbiter m_camera;
+	DrawParam gl;
+	bool mb_cullface;
+	bool mb_wireframe;
 
-    Mesh m_axe;
-    Mesh m_grid;
-    Mesh m_cube;
+	Mesh m_axe;
+	Mesh m_grid;
+	Mesh m_cube;
 
-    bool b_draw_grid;
-    bool b_draw_axe;
-    void init_axe();
-    void init_grid();
-    void init_cube();
+	bool b_draw_grid;
+	bool b_draw_axe;
+	void init_axe();
+	void init_grid();
+	void init_cube();
 
-    Mesh m_quad;
-    void init_quad();
+	Mesh m_quad;
+	void init_quad();
 
-    void draw_axe(const Transform& T);
+	void draw_axe(const Transform& T);
 	void draw_grid(const Transform& T);
 	void draw_cube(const Transform& T);
 	void draw_quad(const Transform& T);
 
-    void manageCameraLight();
+	void manageCameraLight();
+
+	int gridSize = 20;
 };
 
 

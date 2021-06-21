@@ -25,6 +25,7 @@ along with Simea.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Particle.h>
 #include "vec.h"
+#include <build/Tissus.h>
 
 
 
@@ -32,10 +33,12 @@ along with Simea.  If not, see <http://www.gnu.org/licenses/>.
 class PhysicalWorld
 {
 public:
-    PhysicalWorld(int np=0) : m_part(np) {}
+	PhysicalWorld(int np = 0) : m_part(np), tissus(Tissus(4, 4, Point(300, 300, -300), 50, 0.5, 0.5)) {
+		m_part.push_back(Particle(100, 5, Point(-300, 500, -300)));
+	}
 
-    std::size_t particlesCount() const { return m_part.size(); }
-    void setParticlesCount(int ns) { m_part.resize(ns); }
+	std::size_t particlesCount() const { return m_part.size(); }
+	void setParticlesCount(int ns) { m_part.resize(ns); }
 
 	//int addParticle(const Vector& p);
 	//void addLine(const Vector& p1, const Vector& p2);
@@ -44,11 +47,14 @@ public:
 
 	void update(const float dt);
 	void draw();
-    void collision(const Point& p, const float radius);
+	void collision(const Point& p, const float radius);
+
 
 
 protected:
-    std::vector<Particle> m_part;
+	Tissus tissus;
+
+	std::vector<Particle> m_part;
 };
 
 

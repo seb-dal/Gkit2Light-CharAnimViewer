@@ -29,8 +29,7 @@ int CharAnimViewer::init()
 
 	//b_draw_grid = false;
 
-	m_world.setParticlesCount(10);
-
+	m_world.setParticlesCount(100);
 
 	init_cylinder();
 	init_sphere();
@@ -83,6 +82,15 @@ void CharAnimViewer::draw_skeleton(const Skeleton& sk, const Transform& pos)
 	}
 }
 
+void CharAnimViewer::collision_skeleton(const Skeleton& sk, const Transform& pos) {
+	for (int i = 0; i < sk.numberOfJoint(); i++) {
+		m_world.collision(pos(sk.getJointPosition(i)), 10);
+	}
+
+}
+
+
+
 
 
 int CharAnimViewer::render()
@@ -95,7 +103,7 @@ int CharAnimViewer::render()
 	gl.camera(m_camera);
 
 	// Affiche les particules physiques (Question 3 : interaction personnage sphere/ballon)
-	//m_world.draw();
+	m_world.draw();
 
 	/*draw_sphere(Point(b.position()), 20);
 	draw_cylinder(Point(b.position()), Point(b.position(40)), 10);*/
@@ -158,18 +166,20 @@ int CharAnimViewer::render()
 	return 1;
 }
 
-
+static const float delta60FPS = 1000 / 60;
 int CharAnimViewer::update(const float time, const float delta)
 {
 	// time est le temps ecoule depuis le demarrage de l'application, en millisecondes,
 	// delta est le temps ecoule depuis l'affichage de la derniere image / le dernier appel a draw(), en millisecondes.
 
-	if (key_state('n')) { m_frameNumber++; cout << m_frameNumber << endl; }
-	if (key_state('b')) { m_frameNumber--; cout << m_frameNumber << endl; }
+	if (true || key_state('n')) { m_frameNumber++; /*cout << m_frameNumber << endl;*/ }
+	if (key_state('b')) { m_frameNumber--; /*cout << m_frameNumber << endl;*/ }
 
 	m_ske.setPose(m_bvh, m_frameNumber);
 
-	m_world.update(0.1f);
+	m_world.update(0.1f * (delta / delta60FPS));
+
+	collision_skeleton(skc.getSkeleton(), Scale(2.5)(skc.getPos()));
 
 	skc.update(delta);
 

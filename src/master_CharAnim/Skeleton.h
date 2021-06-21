@@ -3,6 +3,9 @@
 
 #include "BVH.h"
 #include "mat.h"
+#include <src/master_CharAnim/BVH.h>
+#include <map>
+#include <src/master_CharAnim/TransformQ.h>
 
 class Skeleton
 {
@@ -36,7 +39,6 @@ public:
 	//! l'articulation du père vers le monde.
 	void setPose(const chara::BVH& bvh, int frameNumber);
 
-
 	//! Positionne ce squelette entre la position frameNbSrc du BVH Src et la position frameNbDst du bvh Dst
 	void setPoseInterpolation(const chara::BVH& bvhSrc, int frameNbSrc, const chara::BVH& bvhDst, int frameNbDst, float t);
 
@@ -46,15 +48,17 @@ public:
 
 	struct CASkeleton {
 		Skeleton& sk;
-		BVH& bvh;
+		chara::BVH& bvh;
 		int frame;
+
+		CASkeleton(Skeleton& sk, chara::BVH& bvh, int frame) :sk(sk), bvh(bvh), frame(frame) {}
 	};
 
 	//! Calcule la distance entre deux poses
 	//! precond: les deux squelettes doivent avoir le
 	//! même nombre d'articulations (même structure d'arbre)
 	//! ==> Sera utile lors de la construction du graphe d'animation
-	friend float distance(const CASkeleton& a, const CASkeleton& b);
+	float static distance(const CASkeleton& a, const CASkeleton& b);
 
 
 protected:
@@ -62,6 +66,7 @@ protected:
 	//! Remarque : la notion de hiérarchie (arbre) n'est plus nécessaire ici,
 	//! pour tracer les os on utilise l'information "parentID" de la class CAJoint
 	std::vector<SkeletonJoint> m_joints;
+
 };
 
 #endif

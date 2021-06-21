@@ -10,8 +10,7 @@
 #include "TransformQ.h"
 
 #include <PhysicalWorld.h>
-#include <build/CharacterController.h>
-#include <build/SkeletonControler.h>
+#include <src/master_CharAnim/SkeletonControler.h>
 
 class CharAnimViewer : public Viewer
 {
@@ -39,6 +38,8 @@ protected:
 	void draw_skeleton(const Skeleton&);
 
 	void draw_skeleton(const Skeleton& sk, const Transform& pos);
+
+	void collision_skeleton(const Skeleton& sk, const Transform& pos);
 
 private:
 	static CharAnimViewer* psingleton;

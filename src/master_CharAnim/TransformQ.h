@@ -27,6 +27,7 @@ along with Sime.  If not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <iostream>
 #include <vec.h>
+#include <quaternion.h>
 
 
 /*! \brief
@@ -83,9 +84,7 @@ public:
 
 	inline static TransformQ slerp(const TransformQ& a, const TransformQ& b, float t)
 	{
-		Quaternion Qr;
-		Qr.slerp(a.Q, b.Q, t, true);
-		return TransformQ(Qr, a.T * (1 - t) + b.T * t);
+		return TransformQ(Quaternion::slerp(a.Q, b.Q, t, true), a.T * (1 - t) + b.T * t);
 	}
 
 	void setIdentity()

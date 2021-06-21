@@ -1,24 +1,27 @@
 
 #include "Skeleton.h"
+#include <build/Utility.h>
 
 using namespace chara;
 
 void Skeleton::init(const BVH& bvh)
 {
+	int i;
+	float x, y, z;
+
 	m_joints.resize(bvh.getNumberOfJoint());
 
-	for (int i = 0; i < bvh.getNumberOfJoint(); i++) {
+	for (i = 0; i < bvh.getNumberOfJoint(); i++) {
 		BVHJoint bvhj = bvh.getJoint(i);
 
 		SkeletonJoint joint;
 		joint.m_parentId = bvhj.getParentId();
 
-		float x, y, z;
 		bvhj.getOffset(x, y, z);
-		joint.m_l2w = Translation(x, y, z);
+		joint.m_l2w = Translation(Vector(x, y, z));
 
 		if (joint.m_parentId != -1) {
-			joint.m_l2w = joint.m_l2w(m_joints.at(joint.m_parentId).m_l2w);
+			joint.m_l2w = joint.m_l2w * m_joints.at(joint.m_parentId).m_l2w;
 		}
 
 		m_joints.at(i) = joint;
@@ -40,38 +43,53 @@ int Skeleton::getParentId(const int i) const
 
 void Skeleton::setPose(const BVH& bvh, int frameNumber)
 {
-	int frame = std::abs(frameNumber) % bvh.getNumberOfFrame();
+	int i, j;
+	float x, y, z,
+		xt, yt, zt;
 
-	for (int i = 0; i < bvh.getNumberOfJoint(); i++) {
+
+	Transform l2f;
+	SkeletonJoint joint;
+	//Transform  trans;
+
+	int frame = std::abs(frameNumber) % bvh.getNumberOfFrame();
+	for (i = 0; i < bvh.getNumberOfJoint(); i++) {
 		BVHJoint bvhj = bvh.getJoint(i);
-		SkeletonJoint joint;
 		joint.m_parentId = bvhj.getParentId();
 
-		float x, y, z;
-		bvhj.getOffset(x, y, z);
-		Transform l2f = Translation(x, y, z);
 
-		float xt = 0, yt = 0, zt = 0;
-		for (int j = 0; j < bvhj.getNumberOfChannel(); j++) {
+		bvhj.getOffset(x, y, z);
+		l2f = Translation(Vector(x, y, z));
+		xt = 0, yt = 0, zt = 0;
+		for (j = 0; j < bvhj.getNumberOfChannel(); j++) {
 			BVHChannel chan = bvhj.getChannel(j);
+
+
 			switch (chan.getAxis()) {
 			case AXIS_X:
-				(chan.isRotation()) ?
-					l2f = l2f(RotationX(chan.getData(frame))) :
-					l2f = l2f(Translation(chan.getData(frame), 0, 0));
+				if (chan.isRotation()) {
+					l2f = l2f * Rotation(Vector(1, 0, 0), chan.getData(frame));
+				}
+				else {
+					l2f = l2f * Translation(Vector(chan.getData(frame), 0, 0));
+				}
 
 				break;
 			case AXIS_Y:
-				(chan.isRotation()) ?
-					l2f = l2f(RotationY(chan.getData(frame))) :
-					l2f = l2f(Translation(0, chan.getData(frame), 0));
-
+				if (chan.isRotation()) {
+					l2f = l2f * Rotation(Vector(0, 1, 0), chan.getData(frame));
+				}
+				else {
+					l2f = l2f * Translation(Vector(0, chan.getData(frame), 0));
+				}
 				break;
 			case AXIS_Z:
-				(chan.isRotation()) ?
-					l2f = l2f(RotationZ(chan.getData(frame))) :
-					l2f = l2f(Translation(0, 0, chan.getData(frame)));
-
+				if (chan.isRotation()) {
+					l2f = l2f * Rotation(Vector(0, 0, 1), chan.getData(frame));
+				}
+				else {
+					l2f = l2f * Translation(Vector(0, 0, chan.getData(frame)));
+				}
 				break;
 				/*case AXIS_W:
 					break;*/
@@ -97,56 +115,85 @@ void Skeleton::setPose(const BVH& bvh, int frameNumber)
 }
 
 
-static Transform interpolationMatrix(Transform& a, Transform& b, float r) {
-	Transform res;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			res.m[i][j] = a.m[i][j] * (1 - r) + b.m[i][j] * (r);
-		}
-	}
-	return res;
-}
+
+
 
 void Skeleton::setPoseInterpolation(const BVH& bvhSrc, int frameNbSrc, const BVH& bvhDst, int frameNbDst, float t) {
+
+	int i, j;
+	float x_s, y_s, z_s, x_d, y_d, z_d;
+	float xt = 0, yt = 0, zt = 0;
+
+	Transform a, b, l2f, transA, transB;
+	SkeletonJoint joint;
 
 	int frame_s = std::abs(frameNbSrc) % bvhSrc.getNumberOfFrame();
 	int frame_d = std::abs(frameNbDst) % bvhDst.getNumberOfFrame();
 
-	for (int i = 0; i < bvhSrc.getNumberOfJoint(); i++) {
+	for (i = 0; i < bvhSrc.getNumberOfJoint(); i++) {
 		BVHJoint bvhj_s = bvhSrc.getJoint(i);
 		BVHJoint bvhj_d = bvhDst.getJoint(i);
 
-		SkeletonJoint joint;
+
 		joint.m_parentId = bvhj_s.getParentId();
 
-		float x_s, y_s, z_s, x_d, y_d, z_d;
+
 		bvhj_s.getOffset(x_s, y_s, z_s);
 		bvhj_d.getOffset(x_d, y_d, z_d);
-		Transform l2f = interpolationMatrix(Translation(x_s, y_s, z_s), Translation(x_d, y_d, z_d), t);
 
-		float xt = 0, yt = 0, zt = 0;
-		for (int j = 0; j < bvhj_s.getNumberOfChannel(); j++) {
+
+		a = Translation(Vector(x_s, y_s, z_s));
+		b = Translation(Vector(x_d, y_d, z_d));
+		l2f = Utility::slerp(a, b, t);
+
+		xt = 0, yt = 0, zt = 0;
+		for (j = 0; j < bvhj_s.getNumberOfChannel(); j++) {
 			BVHChannel chan_s = bvhj_s.getChannel(j);
 			BVHChannel chan_d = bvhj_d.getChannel(j);
 
 			switch (chan_s.getAxis()) {
 			case AXIS_X:
-				(chan_s.isRotation()) ?
-					l2f = l2f(interpolationMatrix(RotationX(chan_s.getData(frame_s)), RotationX(chan_d.getData(frame_d)), t)) :
-					l2f = l2f(interpolationMatrix(Translation(chan_s.getData(frame_s), 0, 0), Translation(chan_d.getData(frame_d), 0, 0), t));
+				if (chan_s.isRotation()) {
+					transA = Rotation(Vector(1, 0, 0), chan_s.getData(frame_s));
+					transB = Rotation(Vector(1, 0, 0), chan_s.getData(frame_d));
+
+					l2f = l2f(Utility::slerp(transA, transB, t));
+				}
+				else {
+					transA = Translation(Vector(chan_s.getData(frame_s), 0, 0));
+					transB = Translation(Vector(chan_d.getData(frame_d), 0, 0));
+
+					l2f = l2f(Utility::slerp(transA, transB, t));
+				}
 
 				break;
 			case AXIS_Y:
-				(chan_s.isRotation()) ?
-					l2f = l2f(interpolationMatrix(RotationY(chan_s.getData(frame_s)), RotationY(chan_d.getData(frame_d)), t)) :
-					l2f = l2f(interpolationMatrix(Translation(0, chan_s.getData(frame_s), 0), Translation(0, chan_d.getData(frame_d), 0), t));
+				if (chan_s.isRotation()) {
+					transA = Rotation(Vector(0, 1, 0), chan_s.getData(frame_s));
+					transB = Rotation(Vector(0, 1, 0), chan_s.getData(frame_d));
 
+					l2f = l2f(Utility::slerp(transA, transB, t));
+				}
+				else {
+					transA = Translation(Vector(0, chan_s.getData(frame_s), 0));
+					transB = Translation(Vector(0, chan_d.getData(frame_d), 0));
+
+					l2f = l2f(Utility::slerp(transA, transB, t));
+				}
 				break;
 			case AXIS_Z:
-				(chan_s.isRotation()) ?
-					l2f = l2f(interpolationMatrix(RotationZ(chan_s.getData(frame_s)), RotationZ(chan_d.getData(frame_d)), t)) :
-					l2f = l2f(interpolationMatrix(Translation(0, 0, chan_s.getData(frame_s)), Translation(0, 0, chan_d.getData(frame_d)), t));
+				if (chan_s.isRotation()) {
+					transA = Rotation(Vector(0, 0, 1), chan_s.getData(frame_s));
+					transB = Rotation(Vector(0, 0, 1), chan_s.getData(frame_d));
 
+					l2f = l2f(Utility::slerp(transA, transB, t));
+				}
+				else {
+					transA = Translation(Vector(0, 0, chan_s.getData(frame_s)));
+					transB = Translation(Vector(0, 0, chan_d.getData(frame_d)));
+
+					l2f = l2f(Utility::slerp(transA, transB, t));
+				}
 				break;
 				/*case AXIS_W:
 					break;*/
@@ -172,15 +219,16 @@ void Skeleton::setPoseInterpolation(const BVH& bvhSrc, int frameNbSrc, const BVH
 
 }
 
-float distance(const Skeleton::CASkeleton& a, const Skeleton::CASkeleton& b)
+float Skeleton::distance(const Skeleton::CASkeleton& a, const Skeleton::CASkeleton& b)
 {
+	int i;
+	float diff = 0;
+
 	a.sk.setPose(a.bvh, a.frame);
 	b.sk.setPose(b.bvh, b.frame);
 
-	float diff = 0;
-
 	for (int i = 0; i < a.sk.numberOfJoint(); i++) {
-		diff = std::max(diff, distance2(a.sk.getJointPosition(i), b.sk.getJointPosition(i)));
+		diff += distance2(a.sk.getJointPosition(i), b.sk.getJointPosition(i));
 	}
 
 	return diff;

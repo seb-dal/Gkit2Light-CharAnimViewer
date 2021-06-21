@@ -1,33 +1,6 @@
 #include "CharacterController.h"
 #include "window.h"
-
-static Vector Extract_col(const Transform& t, int col) {
-	return Vector(t.m[0][col], t.m[1][col], t.m[2][col]);
-}
-
-static Vector Extract_translate(const Transform& t) {
-	return Extract_col(t, 3);
-}
-
-
-static Vector Extract_Scale(const Transform& t) {
-	return Vector(
-		length(Extract_col(t, 0)),
-		length(Extract_col(t, 1)),
-		length(Extract_col(t, 2))
-	);
-}
-
-static Transform Extract_Rotation(const Transform& t) {
-	Vector scale = Extract_Scale(t);
-	return Transform(
-		Extract_col(t, 0) / scale(0),
-		Extract_col(t, 1) / scale(1),
-		Extract_col(t, 2) / scale(2),
-		Vector(0, 0, 0)
-	);
-}
-
+#include <build/Utility.h>
 
 CharacterController::CharacterController() {
 	m_v = 0;
@@ -79,10 +52,10 @@ void CharacterController::update(const float dt) {
 	}
 
 	setPosition(direction()(Vector(velocity(), 0, 0)));
-	std::cout << "pos : " << position() << std::endl
+	/*std::cout << "pos : " << position() << std::endl
 		<< "veloc : " << velocity() << std::endl
 		<< "dir : " << direction() << std::endl
-		<< "rot : " << rot << std::endl;
+		<< "rot : " << rot << std::endl;*/
 }
 
 void CharacterController::turnXZ(const float& rot_angle_v) {
@@ -108,16 +81,16 @@ void CharacterController::setVelocityNorm(const float v) {
 }
 
 const Vector CharacterController::position() const {
-	return Extract_translate(m_ch2w);
+	return Utility::Extract_translate(m_ch2w);
 }
 
 Vector CharacterController::position(float pos) {
-	return Extract_translate(Translation(direction()(Vector(pos, 0, 0)))(m_ch2w));
+	return Utility::Extract_translate(Translation(direction()(Vector(pos, 0, 0)))(m_ch2w));
 }
 
 
 const Transform CharacterController::direction() const {
-	return Extract_Rotation(m_ch2w);
+	return Utility::Extract_Rotation(m_ch2w);
 }
 
 float CharacterController::velocity() const {
