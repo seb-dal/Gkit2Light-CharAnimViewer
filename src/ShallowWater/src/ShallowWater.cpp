@@ -32,7 +32,7 @@ void ShallowWater::init(const int DIMX, const int DIMY) {
 	int i, j;
 	for (i = 0; i < DIMX; i++) {
 		for (j = 0; j < DIMY; j++) {
-			//m_g(i, j) = noise2d.normalizedOctaveNoise2D_0_1(0.1 + i * 0.01, 0.1 + j * 0.01, 3) * 30;
+			m_g(i, j) = noise2d.normalizedOctaveNoise2D_0_1(0.1 + i * 0.01, 0.1 + j * 0.01, 3) * 50 - 12.5;
 			m_n(i, j) = std::max(17.5f - m_g(i, j), 0.f);
 
 			m_h(i, j) = m_g(i, j) + m_n(i, j);
@@ -43,6 +43,7 @@ void ShallowWater::init(const int DIMX, const int DIMY) {
 }
 
 void ShallowWater::drawSol(Mesh& m, const int mx, const int Mx, const int my, const int My, const float spaceBetween) {
+	Color c = Color(0.9, 0.85, 0);
 	int i, max = m.vertex_count();
 	int id = 0;
 	int mmx, mmxp, mmy, mmyp;
@@ -59,18 +60,24 @@ void ShallowWater::drawSol(Mesh& m, const int mx, const int Mx, const int my, co
 			zz = y * spaceBetween;
 			zzp = zz + spaceBetween;
 
+			m.color(id, c);
 			m.vertex(id, xxp, m_g(mmxp, mmy), zz);
 			id++;
+			m.color(id, c);
 			m.vertex(id, xx, m_g(mmx, mmy), zz);
 			id++;
+			m.color(id, c);
 			m.vertex(id, xx, m_g(mmx, mmyp), zzp);
 
 
 			id++;
+			m.color(id, c);
 			m.vertex(id, xxp, m_g(mmxp, mmy), zz);
 			id++;
+			m.color(id, c);
 			m.vertex(id, xx, m_g(mmx, mmyp), zzp);
 			id++;
+			m.color(id, c);
 			m.vertex(id, xxp, m_g(mmxp, mmyp), zzp);
 
 			id++;
@@ -80,7 +87,7 @@ void ShallowWater::drawSol(Mesh& m, const int mx, const int Mx, const int my, co
 }
 
 void ShallowWater::draw(Mesh& m, const int mx, const int Mx, const int my, const int My, const float spaceBetween) {
-	update_rf();
+	//update_rf();
 
 	int id = 0;
 	Color a, b;
@@ -101,10 +108,10 @@ void ShallowWater::draw(Mesh& m, const int mx, const int Mx, const int my, const
 			zzp = zz + spaceBetween;
 
 			if (m_n(mmxp, mmy) > epsilon_h || m_n(mmx, mmy) > epsilon_h || m_n(mmx, mmyp) > epsilon_h) { a = Blue(); }
-			else { a = White(); }
+			else { a = Color(0.9, 0.85, 0); }
 
 			if (m_n(mmxp, mmy) > epsilon_h || m_n(mmx, mmyp) > epsilon_h || m_n(mmxp, mmyp) > epsilon_h) { b = Blue(); }
-			else { b = White(); }
+			else { b = Color(0.9, 0.85, 0); }
 
 			m.color(id, a);
 			m.vertex(id, xxp, m_h(mmxp, mmy), zz);
@@ -279,7 +286,7 @@ void ShallowWater::update_height() {
 			divX = (m_vX(i + 1, j) - m_vX(i - 1, j)) / (dxy);
 			divY = (m_vY(i, j + 1) - m_vY(i, j - 1)) / (dxy);
 
-			m_n(i, j) -= m_n(i, j) * (divX + divY) * dt;
+			m_n(i, j) -= m_h(i, j) * (divX + divY) * dt;
 		}
 	}
 }
@@ -298,12 +305,19 @@ void ShallowWater::update_velocity() {
 		for (j = 0; j < m_n.dimY(); ++j) {
 			gradX = (m_h(i - 1, j) - m_h(i + 1, j)) / (dxy);
 			m_vX(i, j) += (g * gradX) * dt;
+
+			if (m_n(i, j) < 0)
+				m_vX(i, j) = 0;
 		}
 	}
 	for (i = 0; i < m_n.dimX(); ++i) {
 		for (j = 1; j < m_n.dimY() - 1; ++j) {
 			gradY = (m_h(i, j - 1) - m_h(i, j + 1)) / (dxy);
+
 			m_vY(i, j) += (g * gradY) * dt;
+
+			if (m_n(i, j) < 0)
+				m_vY(i, j) = 0;
 		}
 	}
 

@@ -2,7 +2,7 @@
 #include <vector>
 #include <src/gKit/vec.h>
 
-
+#define noAssert 1
 
 class Array2D {
 public:
@@ -13,17 +13,20 @@ public:
 	const int dimY() const { return m_dimY; }
 
 	float& operator()(const int x, const int y) {
+#if noAssert == 0
 		assert(m_dimX != 0 && m_dimY != 0); // not initialized
 		assert(x < m_dimX&& y < m_dimY); // out of range 
 		assert(x >= 0 && y >= 0); // negatif size
-
+#endif
 		return m_data[y * m_dimX + x];
 	}
 
 	float operator()(const int x, const int y) const {
+#if noAssert == 0
 		assert(m_dimX != 0 && m_dimY != 0); // not initialized
 		assert(x < m_dimX&& y < m_dimY); // out of range 
 		assert(x >= 0 && y >= 0); // negatif size
+#endif
 
 		return m_data[y * m_dimX + x];
 	}
@@ -32,10 +35,13 @@ public:
 		if ((x < 0) || (x > m_dimX) || (y < 0) || (y > m_dimY)) return 0.f;
 		int X = int(x);
 		int Y = int(y);
-		if ((X + 1 >= m_dimX) || (Y + 1 >= m_dimY)) return operator()(X, Y);
-		float IX_b = (x - X) * operator()(X + 1, Y) + (X + 1 - x) * operator()(X, Y);
-		float IX_h = (x - X) * operator()(X + 1, Y + 1) + (X + 1 - x) * operator()(X, Y + 1);
-		return (y - Y) * IX_h + (Y + 1 - y) * IX_b;
+		int Xp = X + 1;
+		int Yp = Y + 1;
+
+		if ((Xp >= m_dimX) || (Yp >= m_dimY)) return operator()(X, Y);
+		float IX_b = (x - X) * operator()(Xp, Y) + (Xp - x) * operator()(X, Y);
+		float IX_h = (x - X) * operator()(Xp, Yp) + (Xp - x) * operator()(X, Yp);
+		return (y - Y) * IX_h + (Yp - y) * IX_b;
 	}
 protected:
 	std::vector<float> m_data; // OU float* m_data
@@ -53,17 +59,21 @@ public:
 	const int dimY() const { return m_dimY; }
 
 	void operator()(const int x, const int y, const bool v) {
+#if noAssert == 0
 		assert(m_dimX != 0 && m_dimY != 0); // not initialized
 		assert(x < m_dimX&& y < m_dimY); // out of range 
 		assert(x >= 0 && y >= 0); // negatif size
+#endif
 
 		m_data[y * m_dimX + x] = v;
 	}
 
 	bool operator()(const int x, const int y) const {
+#if noAssert == 0
 		assert(m_dimX != 0 && m_dimY != 0); // not initialized
 		assert(x < m_dimX&& y < m_dimY); // out of range 
 		assert(x >= 0 && y >= 0); // negatif size
+#endif
 
 		return m_data[y * m_dimX + x];
 	}

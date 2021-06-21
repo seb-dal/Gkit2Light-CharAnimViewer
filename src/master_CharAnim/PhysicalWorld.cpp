@@ -22,7 +22,7 @@ void PhysicalWorld::update(const float dt)
 	}
 
 	for (Spring& sp : tissus.getSprings()) {
-		sp.addForce(0.1);
+		sp.addForce(0.05);
 	}
 
 
@@ -30,7 +30,7 @@ void PhysicalWorld::update(const float dt)
 	int max = particles.sizeTotal();
 	i = 0;
 	for (Particle& parti : tissus.getParticules().get()) {
-		parti.update(0.1);
+		parti.update(0.05);
 		parti.groundCollision();
 		parti.addEarthGravity();
 

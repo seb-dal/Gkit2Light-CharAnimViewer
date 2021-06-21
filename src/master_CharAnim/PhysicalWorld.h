@@ -33,7 +33,7 @@ along with Simea.  If not, see <http://www.gnu.org/licenses/>.
 class PhysicalWorld
 {
 public:
-	PhysicalWorld(int np = 0) : m_part(np), tissus(Tissus(4, 4, Point(300, 300, -300), 50, 0.5, 0.5)) {
+	PhysicalWorld(int np = 0) : m_part(np), tissus(Tissus(8, 4, Point(300, 300, -300), 50, 0.5, 0.5)) {
 		m_part.push_back(Particle(100, 5, Point(-300, 500, -300)));
 	}
 

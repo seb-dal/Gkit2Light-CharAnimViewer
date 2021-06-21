@@ -17,7 +17,7 @@ public:
 	void control(const float delta);
 	int quit() { return 1; }
 private:
-	int sizeX = 200, sizeY = 200;
+	int sizeX = 220, sizeY = 220;
 
 	Mesh water;
 	Mesh Sol;
