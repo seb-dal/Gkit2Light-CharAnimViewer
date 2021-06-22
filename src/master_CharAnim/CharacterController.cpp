@@ -1,6 +1,7 @@
 #include "CharacterController.h"
 #include "window.h"
-#include <build/Utility.h>
+#include <src/master_CharAnim/Utility.h>
+
 
 CharacterController::CharacterController() {
 	m_v = 0;

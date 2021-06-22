@@ -25,7 +25,7 @@ along with Simea.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Particle.h>
 #include "vec.h"
-#include <build/Tissus.h>
+#include <src/master_CharAnim/Tissus.h>
 
 
 

@@ -37,8 +37,8 @@ protected:
 	float m_v;          // le vecteur vitesse est m_v * m_ch2w * Vector(1,0,0)
 	float m_vMax;       // ne peut pas accélérer plus que m_vMax
 
-	const float m_MAX_V = 6;
-	const float m_accel = 0.025;
-	const float m_rotatSpeed = 3;
+	const float m_MAX_V = 6; //Vitesse maximal
+	const float m_accel = 0.025; // Accéleration
+	const float m_rotatSpeed = 3; // vitesse de rotation
 };
 
