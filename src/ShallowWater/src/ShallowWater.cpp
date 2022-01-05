@@ -2,7 +2,7 @@
 #include <src/gKit/window.h>
 #include <src/ShallowWater/include/PerlinNoise.hpp>
 
-//#include <omp.h>
+#include <omp.h>
 
 static int clamps(int value, int minv, int maxv) {
 	return std::min(std::max(value, minv), maxv);
@@ -48,6 +48,7 @@ void ShallowWater::drawSol(Mesh& m, const int mx, const int Mx, const int my, co
 	int id = 0;
 	int mmx, mmxp, mmy, mmyp;
 	float xx, xxp, zz, zzp;
+
 	for (int x = mx; x < Mx - 1; x++) {
 		for (int y = my; y < My - 1; y++) {
 			mmx = x - mx;
@@ -182,6 +183,7 @@ void ShallowWater::advect(const Array2D& src, Array2D& dest, const Array2D& depl
 	int i, j;
 	float x, y;
 
+#pragma omp parallel for collapse(2) private (i,j,x,y)
 	for (i = 0; i < src.dimX(); ++i) {
 		for (j = 0; j < src.dimY(); ++j) {
 			x = (float)i - dt * deplX(i, j);
@@ -196,6 +198,7 @@ void ShallowWater::advect3(const Array2D& s1, Array2D& dest1, const Array2D& s2,
 	int i, j;
 	float x, y;
 
+#pragma omp parallel for collapse(2) private (i,j,x,y)
 	for (i = 1; i < s1.dimX() - 1; ++i) {
 		for (j = 1; j < s1.dimY() - 1; ++j) {
 			x = (float)i - dt * deplX(i, j);
@@ -281,6 +284,7 @@ void ShallowWater::update_height() {
 	int i, j;
 	float divX, divY;
 
+#pragma omp parallel for collapse(2) private (i,j, divX, divY)
 	for (i = 1; i < m_n.dimX() - 1; ++i) {
 		for (j = 1; j < m_n.dimY() - 1; ++j) {
 			divX = (m_vX(i + 1, j) - m_vX(i - 1, j)) / (dxy);
@@ -301,6 +305,7 @@ void ShallowWater::update_velocity() {
 	int i, j;
 	float gradX, gradY;
 
+#pragma omp parallel for collapse(2) private (i,j,gradX, gradY)
 	for (i = 1; i < m_n.dimX() - 1; ++i) {
 		for (j = 0; j < m_n.dimY(); ++j) {
 			gradX = (m_h(i - 1, j) - m_h(i + 1, j)) / (dxy);
@@ -310,6 +315,8 @@ void ShallowWater::update_velocity() {
 				m_vX(i, j) = 0;
 		}
 	}
+
+#pragma omp parallel for collapse(2) private (i,j,gradX, gradY)
 	for (i = 0; i < m_n.dimX(); ++i) {
 		for (j = 1; j < m_n.dimY() - 1; ++j) {
 			gradY = (m_h(i, j - 1) - m_h(i, j + 1)) / (dxy);
@@ -339,7 +346,7 @@ void ShallowWater::update_velocity() {
 void ShallowWater::update_h() {
 
 	int i, j;
-
+#pragma omp parallel for collapse(2) private (i,j)
 	for (i = 0; i < m_n.dimX(); ++i) {
 		for (j = 0; j < m_n.dimY(); ++j) {
 			m_h(i, j) = m_g(i, j) + m_n(i, j);
